@@ -1,0 +1,14 @@
+djj\controller\StudentMessageController.class
+djj\dao\ManageAccountDao.class
+djj\dao\StudentMessageDao.class
+djj\dao\StudentInOutLogDao.class
+djj\service\ManageAccountService.class
+djj\service\StudentMessageService.class
+djj\controller\StudentInOutLogController.class
+djj\domain\Request.class
+djj\controller\ManageAccountController.class
+djj\domain\ManageAccount.class
+djj\service\StudentAccountService.class
+djj\service\StudentInOutLogService.class
+djj\controller\StudentAccountController.class
+djj\config\SpringMvcSupport.class

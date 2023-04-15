@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app21" style="height: 940px;width: 1900px">
+    <!--左侧导航条-->
+    <div id="daohanglan" style="float: left;width: 20%;height: 100%;border: 1px solid black">
+        <h5 style="margin-left: 15px;font-size: 17px">你好！name</h5>
+        <el-menu
+                default-active="1"
+                class="el-menu-vertical-demo">
+            <el-menu-item index="1" @click="manageLog">
+                <i class="el-icon-menu"></i>
+                <span slot="title">管理进出记录</span>
+            </el-menu-item>
+            <el-menu-item index="2" @click="manageRequest">
+                <i class="el-icon-menu"></i>
+                <span slot="title">管理申请</span>
+            </el-menu-item>
+            <el-menu-item index="3" @click="manageStudent">
+                <i class="el-icon-menu"></i>
+                <span slot="title">管理学生</span>
+            </el-menu-item>
+        </el-menu>
+    </div>
+    <div id="tableHead" style="float: left;width: 79%;height: 6%;border-top: 1px solid black;border-right: 1px solid black">
+        <!--查询表头-->
+        <el-form :inline="true" :model="formInline" class="demo-form-inline">
+            <el-form-item label="审批人">
+                <el-input v-model="formInline.user" placeholder="审批人"></el-input>
+            </el-form-item>
+            <el-form-item label="活动区域">
+                <el-select v-model="formInline.region" placeholder="活动区域">
+                    <el-option label="区域一" value="shanghai"></el-option>
+                    <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onSubmit">查询</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+
+    <div style="float: left;width: 79%;height: 94%">
+        <!--表格-->
+        <div style="height: 95%;width: 100%;;border-right: 1px solid black">
+            <template>
+                <el-table
+                        :data="tableData"
+                        style="width: 100%">
+                    <el-table-column
+                            prop="data"
+                            label="申请日期"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="姓名"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="num"
+                            label="学号"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="phone"
+                            label="号码"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="outTime"
+                            label="出校时间"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="inTime"
+                            label="进校时间"
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            width="200"
+                            prop="reason"
+                            label="原因">
+                    </el-table-column>
+                    <el-table-column
+                            fixed="right"
+                            label="操作"
+                            width="100">
+                        <template slot-scope="scope">
+                            <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+                            <el-button type="text" size="small">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+        </div>
+        <!--底部表条-->
+        <div style="height: 5%;width: 100%;border-bottom: 1px solid black;;border-right: 1px solid black">
+            <el-pagination
+                    :page-size="20"
+                    :pager-count="11"
+                    layout="prev, pager, next"
+                    :total="500">
+            </el-pagination>
+        </div>
+    </div>
+</div>
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+
+<script>
+    new Vue({
+        el:"#app21",
+        data() {
+            return {
+                tableData: [{
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    num: '1101',
+                    outTime:'kkk',
+                    inTime:'kkk',
+                    reason:'为什么进出学校为什么是因为是吗为什么进出学校为什么是因为是吗为什么进出学校为什么是因为是吗'
+                },{
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    num: '1101',
+                    outTime:'kkk',
+                    inTime:'kkk',
+                    reason:'为什么进出学校为什么是因为是吗'
+                },{
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    num: '1101',
+                    outTime:'kkk',
+                    inTime:'kkk',
+                    reason:'为什么进出学校为什么是因为是吗'
+                }],
+                formInline: {
+                    user: '',
+                    region: ''
+                }
+            }
+        },
+        methods: {
+            manageLog() {
+                alert(this.tableData);
+            },
+            manageRequest() {
+                alert("查询所有，加查单个，以及操作数据");
+                window.location.href="adminPageRequest.html";
+            },
+            manageStudent() {
+                alert("查询所有，加查单个，以及操作数据");
+                window.location.href="adminPageStudent.html";
+            },
+// 查询按钮事件
+            onSubmit() {
+                console.log('submit!');
+            },
+//查看按钮事件
+            handleClick(row) {
+            }
+        }
+
+    })
+</script>
+</body>
+</html>

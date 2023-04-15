@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="app14" style="height: 900px;width: 1900px">
+        <!--左侧导航条-->
+        <div id="daohanglan" style="float: left;width: 20%;height: 100%;">
+            <div style="width: 100%;height: 9%;overflow: hidden;background-color: white;border-bottom: 1px solid black">
+                <!--显示时间-->
+                <i class="el-icon-time" style="font-size: 30px;float: left;margin-top: 10px"></i>
+                <h4 style="float: left;margin-top: 40px;margin-left: 20px" id="time">time</h4>
+            </div>
+            <!--菜单选项-->
+            <div style="width: 100%;height: 50%;float: top">
+                <el-menu
+                        default-active="3"
+                        class="el-menu-vertical-demo"
+                        @open="handleOpen"
+                        @close="handleClose">
+                    <el-menu-item index="1" @click="showNotice">
+                        <i class="el-icon-chat-round"></i>
+                        <span slot="title">通知</span>
+                    </el-menu-item>
+                    <el-menu-item index="2" @click="showInOutLog">
+                        <i class="el-icon-search"></i>
+                        <span slot="title">进出记录</span>
+                    </el-menu-item>
+                    <el-submenu index="3">
+                        <span slot="title"><i class="el-icon-upload"></i>提交申请</span>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-1"  @click="showRequestPage">请假</el-menu-item>
+                            <el-menu-item index="3-2">返校</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-menu-item index="4" @click="showPersonalMessage">
+                        <i class="el-icon-s-custom"></i>
+                        <span slot="title">个人</span>
+                    </el-menu-item>
+                </el-menu>
+            </div>
+            <!--里面有图标和账户名-->
+            <div style="width: 100%;height: 10%;">
+                <!--用户图标                 -->
+                <div style="float: left">
+                    <i class="el-icon-star-off"></i>
+                    <i class="el-icon-star-on"></i>
+                    <i class="el-icon-star-off"></i>
+                </div>
+                <!--账户名                     -->
+                <div style="float: left;margin-left: 10%">
+                    <span>当前账户：</span>
+                    <span :model="p.num">{{p.num}}</span>
+                </div>
+
+                <div style="float: right">
+                    <i class="el-icon-star-off"></i>
+                    <i class="el-icon-star-on"></i>
+                    <i class="el-icon-star-off"></i>
+                </div>
+            </div>
+            <!--退出登录按钮和遇到问题链接-->
+            <div style="width: 100%;margin-top: 200px">
+                <el-row>
+                    <el-button plain style="width: 100%"  @click="returnLoginPage"><i class="el-icon-switch-button">退出登录</i></el-button>
+                </el-row>
+
+                <div style="width: 100%;height: 40px"></div>
+
+                <el-link type="primary" disabled style="margin-left: 40%">      遇到问题？</el-link>
+            </div>
+        </div>
+
+        <div style="float: left;width: 79%;height: 100%;border-left: 1px solid black">
+                <div style="float: left;width: 80%;height: 80%;margin-top: 10%">
+<!--申请表单-->
+                    <el-form ref="form" :model="form" label-width="80px">
+
+                        <el-form-item label="目的地址">
+                            <el-input v-model="form.purposeAddress"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="开始时间">
+                            <el-date-picker
+                                    v-model="form.date1"
+                                    type="datetime"
+                                    placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+
+                        <el-form-item label="结束时间">
+                            <el-date-picker
+                                    v-model="form.date2"
+                                    type="datetime"
+                                    placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+
+                        <el-form-item label="出校理由">
+                            <el-input type="textarea" v-model="form.reason"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="onSubmit">立即创建</el-button>
+                        </el-form-item>
+
+                    </el-form>
+                </div>
+        </div>
+
+
+    </div>
+
+
+    <!--    导入element-ui和vue-->
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        new Vue({
+            el:"#app14",
+            data() {
+                return {
+                    form: {
+                        purposeAddress: '',
+                        date1: '',
+                        date2: '',
+                    },p:{
+                        num:""
+                    }
+                }
+            },
+            //Vue对象初始化完成后自动执行
+            created(){
+                this.getAccountNum();
+            },
+            methods: {
+                // 提交按钮事件
+                onSubmit() {
+                    var purposeAddress =  this.form.purposeAddress;
+                    var date1 = this.form.date1;
+                    var date2 = this.form.date2;
+                    var reason = this.form.reason;
+                    var num = this.p.num;
+                    if(purposeAddress.toString().length === 0){
+                        alert("理由不可为空")
+                    }else if(date1.toString().length === 0){
+                        alert("开始时间不可为空")
+                    }else if(date2.toString().length === 0){
+                        alert("结束时间不可为空")
+                    }else if (reason.toString().length === 0){
+                        alert("理由不可为空")
+                    }else {
+                        axios({
+                            method:"post",
+                            url:"http://localhost:8080/graduation_design/inOutLog/1",
+                            data:{
+                                purposeAddress: purposeAddress,
+                                date1: date1,
+                                date2: date2,
+                                reason:reason,
+                                userNum:num
+                            },headers:{
+                                "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                            }
+                        }).then(res=>{
+                            alert(res.data.toString());
+                            if(res.data.toString() === "1"){
+                                alert("提交成功");
+                            }else if(res.data.toString() === "0"){
+                                alert("结束时间不可早于开始时间");
+                            }else if (res.data.toString() === "2"){
+                                alert("请假时间不可早于开始时间");
+                            } else {
+                                alert("出错了")
+                            }
+                        })
+                    }
+                },
+                showInOutLog(){
+                    alert("只展示进出记录记录");
+                    window.location.href="mainPageForLog.html";
+                },
+                showNotice(){
+                    alert("只展示通知");
+                    window.location.href="mainPageForNotes.html";
+                },
+                showRequestPage(){
+                    alert("提交请求");
+                },
+                showPersonalMessage(){
+                    alert("展示个人信息，下面是修改按钮，点击修改信息")
+                    window.location.href="mainPageForPersonal.html";
+                },
+                getAccountNum(){
+                    var num = localStorage.getItem("key");
+                    this.p.num=num;
+                },
+                returnLoginPage(){
+                    var v = confirm("确认退出登录？");
+                    if(v){
+                        window.location.href="loginPage.html"//跳转回去
+                    }
+
+                    //弹出确认框
+                    function popup(){
+                        alert("确认退出登录？");
+                    }
+                },
+                handleOpen(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                handleClose(key, keyPath) {
+                    console.log(key, keyPath);
+                }
+            }
+        })
+        //显示实时时间方法
+        setInterval(() => {
+            function showdata() {
+                var date=new Date();
+
+                //年
+                var year = date.getFullYear();
+                //月
+                var month =
+                    date.getMonth() + 1 < 10
+                        ? "0" + (date.getMonth() + 1)
+                        : date.getMonth() + 1;
+                //日
+                var day =
+                    date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+                //时
+                var hh =
+                    date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+                //分
+                var mm =
+                    date.getMinutes() < 10
+                        ? "0" + date.getMinutes()
+                        : date.getMinutes();
+                //秒
+                var ss =
+                    date.getSeconds() < 10
+                        ? "0" + date.getSeconds()
+                        : date.getSeconds();
+
+                var nowTime;
+
+                nowTime =
+                    year +
+                    "年" +
+                    month +
+                    "月" +
+                    day +
+                    "日" +
+                    " " +
+                    hh +
+                    ":" +
+                    mm +
+                    ":" +
+                    ss;
+                return nowTime;
+            }
+            var d=showdata()
+            time.innerHTML=d
+        }, 1000);
+    </script>
+
+</body>
+</html>

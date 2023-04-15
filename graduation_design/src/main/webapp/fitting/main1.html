@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="main1">
+        <div id="tableHead" style="float: left;width: 79%;height: 10%;">
+            <!--空格div-->
+            <div style="float: top;width: 100%;height: 22%;">
+
+            </div>
+            <!--查询表头-->
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form-item label="申请日期">
+<!--                    <el-input v-model="formInline.date" placeholder="日期"></el-input>-->
+                    <template>
+                        <div class="block">
+                            <el-date-picker
+                                    v-model="formInline.date"
+                                    type="date"
+                                    placeholder="选择日期"
+                                    value-format="yyyy-MM-dd">
+                            </el-date-picker>
+                        </div>
+                    </template>
+                </el-form-item>
+
+                <el-form-item label="目的地址">
+                    <el-input v-model="formInline.address" placeholder="地址"></el-input>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">查询</el-button>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button plain @click="onCancel">取消</el-button>
+                </el-form-item>
+            </el-form>
+
+        </div>
+        <!--里面有表格和底部-->
+        <div style="float: left;width: 79%;height: 85%;">
+            <!--表格-->
+            <div style="height: 95%;width: 100%;">
+                <template>
+                    <div>
+                        <el-divider content-position="left">进出记录</el-divider>
+                    </div>
+                </template>
+                <template>
+                    <el-table
+                            :data="tableData"
+                            style="width: 100%">
+                        <el-table-column
+                                prop="date"
+                                label="申请日期"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="startAddress"
+                                label="开始地址"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="purposeAddress"
+                                label="目的地址"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="outTime"
+                                label="出校时间"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="inTime"
+                                label="进校时间"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                align="center"
+                                prop="reason"
+                                label="原因">
+                        </el-table-column>
+                        <el-table-column
+                                align="center"
+                                prop="myResponse"
+                                label="审批意见">
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </div>
+            <!--底部表条-->
+            <div style="height: 5%;width: 100%;">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="p.pageNum"
+                        :page-sizes="[5, 10, 15, 20]"
+                        :page-size="p.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
+
+    <!--    导入element-ui和vue-->
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el:"#main1",
+            data(){
+                return{
+                    tableData: [],
+                    formInline: {
+                        date: '',
+                        address:'',
+                    },
+                    p:{num:"", pageNum:1, pageSize:10},
+                    total:15,//TODO
+                    value1:""
+                }
+            },
+            //Vue对象初始化完成后自动执行
+            created(){
+                this.getAll();
+                this.getAccountName();
+                localStorage.setItem("url","../fitting/main1.html");
+                // var count = localStorage.getItem("count")
+                // count++;
+                // localStorage.setItem("count",count);
+                // if(count > 1){
+                //     localStorage.setItem("url","../fitting/main1.html");
+                // }
+            },
+            methods:{
+                onSubmit() {
+                    var num =this.p.num;
+                    var searchDate = this.formInline.date;
+                    var searchAddress = this.formInline.address;
+                    var pageNum = this.p.pageNum;
+                    var pageSize = this.p.pageSize;
+                    alert(searchDate.toString().length)
+                    alert(searchAddress.toString().length)
+                    //只查询日期
+                    if(searchDate.toString().length !== 0 && searchAddress.toString().length === 0){
+                        alert(searchDate.length)
+                        alert("1")
+                        axios({
+                            method:"get",
+                            url:"http://localhost:8080/graduation_design/inOutLog/2/num/"+num+"/date/"+searchDate.toString()+"/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                    }else if (searchDate.toString().length === 0 && searchAddress.toString().length !== 0){
+                        alert("2")
+                        //写只查询地址
+                        axios({
+                            method:"get",
+                            url:"http://localhost:8080/graduation_design/inOutLog/6/num/"+num+"/address/"+searchAddress+"/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                    }else if (searchDate.toString().length !== 0 && searchAddress.toString().length !== 0){
+                        alert("3")
+                        //写查询地址和日期
+                        axios({
+                            method:"get",
+                            url:"http://localhost:8080/graduation_design/inOutLog/7/num/"+num+"/date/"+searchDate.toString()+"/address/"+searchAddress+"/pageNum/"+pageNum+"/pageSize/"+pageSize,                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                    }else{
+                        alert("查询请输入数据")
+                    }
+                },
+                onCancel(){
+                    this.getAll();
+                },
+                getAll(){
+                    this.getAccountName();
+                    var num =this.p.num;
+                    var pageNum = this.p.pageNum;
+                    var pageSize = this.p.pageSize;
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/1/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                    }).then(res=>{
+                        this.tableData=res.data;
+                    })
+                    this.getTotal();
+                },
+                getAccountName(){
+                    var num = localStorage.getItem("key");
+                    this.p.num=num;
+                },
+                handleSizeChange(val) {
+                    this.p.pageSize=val;
+                    this.getAll();
+                },
+                handleCurrentChange(val) {
+                    this.p.pageNum=val;
+                    this.getAll();
+                },
+                handleOpen(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                handleClose(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                getTotal(){
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/17/num/"+this.p.num,
+                    }).then(res=>{
+                        this.total = res.data;
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>

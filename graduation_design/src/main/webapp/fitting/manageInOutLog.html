@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理进出记录</title>
+</head>
+<body>
+
+<div id="manageInOutLog">
+
+
+    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item>
+            <el-input v-model="formInline.name" placeholder="姓名"></el-input>
+            <el-input v-model="formInline.date" placeholder="日期"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="selectMessage">查询</el-button>
+            <el-button @click="getAll">取消查询</el-button>
+        </el-form-item>
+    </el-form>
+
+    <template>
+        <el-table
+                ref="multipleTable"
+                :data="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @selection-change="handleSelectionChange"
+                :default-sort = "{prop: 'date', order: 'descending'}">
+
+            <el-table-column
+                    prop="date"
+                    label="日期"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.date}}</template>
+                <input ></input>
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="姓名"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.name}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="num"
+                    label="学号"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.num}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="phone"
+                    label="电话"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.phone}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="inTime"
+                    label="进校时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.inTime}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="outTime"
+                    label="出校时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.outTime}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="startAddress"
+                    label="开始地址"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.startAddress}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="purposeAddress"
+                    label="目的地址"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.purposeAddress}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="reason"
+                    label="原因"
+                    width="150">
+                <template slot-scope="scope">{{ scope.row.reason}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="myResponse"
+                    label="审批意见"
+                    width="150">
+                <template slot-scope="scope">{{ scope.row.myResponse}}</template>
+            </el-table-column>
+        </el-table>
+    </template>
+
+    <!--底部表条-->
+    <div style="height: 5%;width: 100%;">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="p.pageNum"
+                :page-sizes="[5, 10,15,20]"
+                :page-size="p.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+        </el-pagination>
+    </div>
+
+</div>
+
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el:"#manageInOutLog",
+        data(){
+            return{
+                tableData: [{
+                }],
+                multipleSelection: [],
+                formInline: {
+                    user: '',
+                    date:''
+                },
+                p:{
+                    num:"",
+                    pageNum:1,
+                    pageSize:10
+                },
+                total:99,
+                //修改的表单
+                form:{
+                    newAccountName:"账户名为学号，不可更改",
+                    newPassword:"hhh",
+                    reNewPassword:"hhh"
+                },
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+            localStorage.setItem("adminurl","../fitting/manageInOutLog.html");
+        },
+        methods: {
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            onSubmit() {
+                console.log('submit!');
+            },
+            handleSizeChange(val) {
+                this.p.pageSize=val;
+                this.getAll();
+            },
+            handleCurrentChange(val) {
+                this.p.pageNum=val;
+                this.getAll();
+            },
+            getAccountNum(){
+                this.p.num=localStorage.getItem("a-key");
+            },
+            //
+            getAll(){
+                //查询所有进出记录
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/16/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                }).then(res=>{
+                    this.tableData=res.data;
+                })
+                this.getTotal()
+            },
+            getTotal(){
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/19",
+                }).then(res=>{
+                    this.total = res.data;
+                })
+            },
+            selectMessage(){
+                if(this.formInline.name.length === 0 && this.formInline.date.length !== 0){
+                    alert("riqi")
+                }else if(this.formInline.name.length !== 0 && this.formInline.date.length === 0){
+                    alert("name")
+                }else if(this.formInline.name.length !== 0 && this.formInline.date.length !== 0){
+                    alert("both")
+                }else{
+                    alert("请输入数据查询")
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>

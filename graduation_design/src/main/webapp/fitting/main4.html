@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="main4">
+    <!--申请表单-->
+    <el-form ref="form" :model="form" label-width="80px">
+
+        <el-form-item label="开始地址">
+            <el-input v-model="form.startAddress"></el-input>
+        </el-form-item>
+        <el-form-item label="目的地址">
+            <el-input v-model="form.purposeAddress"></el-input>
+        </el-form-item>
+
+        <el-form-item label="开始时间">
+            <el-date-picker
+                    v-model="form.date1"
+                    type="datetime"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+        </el-form-item>
+
+        <el-form-item label="结束时间">
+            <el-date-picker
+                    v-model="form.date2"
+                    type="datetime"
+                    placeholder="选择日期时间">
+            </el-date-picker>
+        </el-form-item>
+
+        <el-form-item label="返校理由">
+            <el-input type="textarea" v-model="form.reason"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">立即创建</el-button>
+        </el-form-item>
+
+    </el-form>
+</div>
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el:"#main4",
+        data() {
+            return {
+                form: {
+                    startAddress:"",
+                    purposeAddress: '学校地址',
+                    date1: '',
+                    date2: '',
+                    reason:''
+                },
+                p:{
+                    num:""
+                }
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAccountNum();
+            localStorage.setItem("url","../fitting/main4.html");
+        },
+        methods:{
+            onSubmit() {
+                var purposeAddress =  this.form.purposeAddress;
+                var startAddress =  this.form.startAddress;
+                var date1 = this.form.date1;
+                var date2 = this.form.date2;
+                var reason = this.form.reason;
+                var num = this.p.num;
+                if(purposeAddress.toString().length === 0){
+                    alert("理由不可为空")
+                }else if(startAddress.toString().length === 0){
+                    alert("开始地不可为空")
+                }else if(date1.toString().length === 0){
+                    alert("开始时间不可为空")
+                }else if(date2.toString().length === 0){
+                    alert("结束时间不可为空")
+                }else if (reason.toString().length === 0){
+                    alert("理由不可为空")
+                }else {
+                    //先发送请求看用户是否已经存在请求如果不存在才可继续申请
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/15/num/"+num,
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true"){
+                            alert("你存在申请中的请求，不可再次提交");
+                        }else{
+                            //发起申请
+                            axios({
+                                method:"post",
+                                url:"http://localhost:8080/graduation_design/inOutLog/1",
+                                data:{
+                                    startAddress:startAddress,
+                                    purposeAddress: purposeAddress,
+                                    date1: date1,
+                                    date2: date2,
+                                    reason:reason,
+                                    userNum:num
+                                },headers:{
+                                    "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                                }
+                            }).then(res=>{
+                                alert(res.data.toString());
+                                if(res.data.toString() === "1"){
+                                    alert("提交成功");
+                                }else if(res.data.toString() === "0"){
+                                    alert("结束时间不可早于开始时间");
+                                }else if (res.data.toString() === "2"){
+                                    alert("开始时间需在现在时间之后");
+                                } else {
+                                    alert("出错了")
+                                }
+                            })
+                        }
+                    })
+                }
+            },
+            getAccountNum(){
+                var num = localStorage.getItem("key");
+                this.p.num=num;
+            }
+        }
+    })
+</script>
+</body>
+</html>

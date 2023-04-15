@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app12" style="height: 900px;width: 1900px">
+
+<!--左侧导航条-->
+    <div id="daohanglan" style="float: left;width: 20%;height: 100%;">
+        <div style="width: 100%;height: 9%;overflow: hidden;background-color: white;border-bottom: 1px solid black">
+<!--显示时间-->
+            <i class="el-icon-time" style="font-size: 30px;float: left;margin-top: 10px"></i>
+            <h4 style="float: left;margin-top: 40px;margin-left: 20px" id="time">time</h4>
+        </div>
+<!--菜单选项-->
+        <div style="width: 100%;height: 50%;float: top">
+            <el-menu
+                    default-active="1"
+                    @open="handleOpen"
+                    @close="handleClose"
+                    class="el-menu-vertical-demo">
+                <el-menu-item index="1" @click="showNotice">
+                    <i class="el-icon-chat-round"></i>
+                    <span slot="title">通知</span>
+                </el-menu-item>
+                <el-menu-item index="2" @click="showInOutLog">
+                    <i class="el-icon-search"></i>
+                    <span slot="title">进出记录</span>
+                </el-menu-item>
+                <el-submenu index="3">
+                    <span slot="title"><i class="el-icon-upload"></i>提交申请</span>
+                    <el-menu-item-group>
+                        <el-menu-item index="3-1"  @click="showRequestPage">请假</el-menu-item>
+                        <el-menu-item index="3-2">返校</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-menu-item index="4" @click="showPersonalMessage">
+                    <i class="el-icon-s-custom"></i>
+                    <span slot="title">个人</span>
+                </el-menu-item>
+            </el-menu>
+        </div>
+<!--里面有图标和账户名-->
+        <div style="width: 100%;height: 10%;">
+            <!--用户图标                 -->
+            <div style="float: left">
+                <i class="el-icon-star-off"></i>
+                <i class="el-icon-star-on"></i>
+                <i class="el-icon-star-off"></i>
+            </div>
+<!--账户名                     -->
+            <div style="float: left;margin-left: 10%">
+                <span>当前账户：</span>
+                <span :model="p.num">{{p.num}}</span>
+            </div>
+
+            <div style="float: right">
+                <i class="el-icon-star-off"></i>
+                <i class="el-icon-star-on"></i>
+                <i class="el-icon-star-off"></i>
+            </div>
+        </div>
+
+<!--退出登录按钮和遇到问题链接-->
+        <div style="width: 100%;margin-top: 200px">
+
+            <el-link type="primary" disabled style="margin-left: 40%">      遇到问题？</el-link>
+
+            <div style="width: 100%;height: 40px"></div>
+
+            <el-row>
+                <el-button plain style="width: 100%"  @click="returnLoginPage"><i class="el-icon-switch-button">退出登录</i></el-button>
+            </el-row>
+
+
+        </div>
+
+    </div>
+
+
+    <!--里面装了查询表头-->
+    <div id="tableHead" style="float: left;width: 79%;height: 9%;border-left: 1px solid black">
+
+<!--空格div-->
+        <div style="float: top;width: 50%;height: 22%;">
+
+        </div>
+<!--查询表头-->
+        <el-form :inline="true" :model="formInline" class="demo-form-inline">
+            <el-form-item label="状态">
+                <el-input v-model="formInline.checked" placeholder="通过或拒绝"></el-input>
+            </el-form-item>
+
+            <el-form-item label="日期">
+                <el-input v-model="formInline.date" placeholder="日期"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="onSubmit">查询</el-button>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button plain @click="onCancel">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+<!--    里面有表格和底部表条-->
+    <div style="float: left;width: 79%;height: 94%;border-left: 1px solid black">
+<!--表格-->
+        <div style="height: 95%;width: 100%;">
+            <template>
+                <div>
+                    <el-divider content-position="left">通知</el-divider>
+                </div>
+            </template>
+            <template>
+                <el-table
+                        :data="tableData"
+                        style="width: 100%">
+                    <el-table-column
+                            prop="description"
+                            label="通知"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="checked"
+                            label="申请状态"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="checked"
+                            label="操作"
+                            align="center">
+<!--                        <el-row>-->
+<!--                            <el-button round @click="showDetail">查看</el-button>-->
+<!--                        </el-row>-->
+
+
+
+                        <!-- Form -->
+                        <el-button type="text" @click="dialogFormVisible = true">查看</el-button>
+
+                        <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :append-to-body="true">
+                            <el-form :model="form">
+                                <el-form-item label="活动名称" :label-width="formLabelWidth">
+                                    <el-input v-model="form.name" autocomplete="off"></el-input>
+                                </el-form-item>
+                                <el-form-item label="活动区域" :label-width="formLabelWidth">
+                                    <el-select v-model="form.region" placeholder="请选择活动区域">
+                                        <el-option label="区域一" value="shanghai"></el-option>
+                                        <el-option label="区域二" value="beijing"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                            <div slot="footer" class="dialog-footer">
+                                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                                <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+                            </div>
+                        </el-dialog>
+                    </el-table-column>
+
+                </el-table>
+            </template>
+        </div>
+        <!--底部表条-->
+        <div style="height: 5%;width: 100%;">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="p.pageNum"
+                    :page-sizes="[5, 10]"
+                    :page-size="p.pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="total">
+            </el-pagination>
+        </div>
+    </div>
+</div>
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el:"#app12",
+        data() {
+            return {
+                tableData: [{
+                    notice: '你与？？？提交的通知已经被？？？'
+                }],
+                formInline: {
+                    checked: '',
+                    date:''
+                },
+                p:{
+                    num:"",
+                    pageNum:1,
+                    pageSize:10
+                },
+                total:15,
+                //以下都是弹出框内容
+                dialogFormVisible: false,
+                form: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: ''
+                },
+                formLabelWidth: '120px'
+
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+        },
+        methods: {
+            showInOutLog(){
+                alert("只展示进出记录记录");
+                window.location.href="mainPageForLog.html";
+            },
+            showNotice(){
+                alert("只展示通知");
+            },
+            showRequestPage(){
+                alert("展示自己的请求，下面是修改按钮，点击修改信息");
+                window.location.href="mainPageForRequest.html";
+            },
+            showPersonalMessage(){
+                alert("展示个人信息，下面是修改按钮，点击修改信息")
+                window.location.href="mainPageForPersonal.html";
+            },
+            onSubmit() {
+                var searchChecked = this.formInline.checked;
+                var searchDate = this.formInline.date;
+                //查询数据
+                var num =this.p.num;
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                if (searchChecked.toString().length !== 0 && searchDate.toString().length === 0){
+                    axios({
+                        method:"get",
+                        headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        url:"http://localhost:8080/graduation_design/inOutLog/4/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/checked/"+searchChecked,
+                    }).then(res=>{
+                        this.tableData=res.data;
+                    })
+                }else if (searchChecked.toString().length === 0 && searchDate.toString().length !== 0){
+                    axios({
+                        method:"get",
+                        headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        url:"http://localhost:8080/graduation_design/inOutLog/8/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/date/"+searchDate,
+                    }).then(res=>{
+                        this.tableData=res.data;
+                    })
+                }else if (searchChecked.toString().length !== 0 && searchDate.toString().length !== 0){
+                    // search by both
+                    axios({
+                        method:"get",
+                        headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                        url:"http://localhost:8080/graduation_design/inOutLog/9/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/date/"+searchDate+"/checked/"+searchChecked,
+                    }).then(res=>{
+                        this.tableData=res.data;
+                    })
+                }
+            },
+            onCancel(){
+                this.getAll();
+            },
+            getAll(){
+                this.getAccountNum();
+                //查询数据
+                var num =this.p.num;
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/3/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                }).then(res=>{
+                    this.tableData=res.data;
+                })
+            },
+            getAccountNum(){
+                var num = localStorage.getItem("key");
+                this.p.num=num;
+            },
+            handleSizeChange(val) {
+                this.p.pageSize=val;
+                this.getAll();
+            },
+            handleCurrentChange(val) {
+                this.p.pageNum=val;
+                this.getAll();
+            },
+            returnLoginPage(){
+                var v = confirm("确认退出登录？");
+                if(v){
+                    window.location.href="loginPage.html"//跳转回去
+                }
+
+                //弹出确认框
+                function popup(){
+                    alert("确认退出登录？");
+                }
+            },
+            showDetail(){
+
+            },
+            handleOpen(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            handleClose(key, keyPath) {
+                console.log(key, keyPath);
+            }
+        }
+    })
+
+    //显示实时时间方法
+    setInterval(() => {
+        function showdata() {
+            var date=new Date();
+
+            //年
+            var year = date.getFullYear();
+            //月
+            var month =
+                date.getMonth() + 1 < 10
+                    ? "0" + (date.getMonth() + 1)
+                    : date.getMonth() + 1;
+            //日
+            var day =
+                date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+            //时
+            var hh =
+                date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+            //分
+            var mm =
+                date.getMinutes() < 10
+                    ? "0" + date.getMinutes()
+                    : date.getMinutes();
+            //秒
+            var ss =
+                date.getSeconds() < 10
+                    ? "0" + date.getSeconds()
+                    : date.getSeconds();
+
+            var nowTime;
+
+            nowTime =
+                year +
+                "年" +
+                month +
+                "月" +
+                day +
+                "日" +
+                " " +
+                hh +
+                ":" +
+                mm +
+                ":" +
+                ss;
+            return nowTime;
+        }
+        var d=showdata()
+        time.innerHTML=d
+    }, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+</head>
+<body>
+  <div id="caidan">
+
+    <div style="width: 100%;height: 10%;overflow: hidden; ">
+      <!--显示时间-->
+      <i class="el-icon-time" style="font-size: 30px;float: left;margin-top: 10px"></i>
+      <h4 style="float: left;margin-top: 40px;margin-left: 0px" id="time">time</h4>
+    </div>
+
+    <div style="width: 100%;height: 60%;">
+      <el-menu
+              :default-active="deactive"
+              @open="handleOpen"
+              @close="handleClose"
+              class="el-menu-vertical-demo">
+        <el-menu-item index="1" @click="showNotice">
+          <i class="el-icon-chat-round"></i>
+          <span slot="title">我的请求</span>
+        </el-menu-item>
+        <el-menu-item index="2" @click="showInOutLog">
+          <i class="el-icon-search"></i>
+          <span slot="title">进出记录</span>
+        </el-menu-item>
+        <el-submenu index="3" >
+          <span slot="title"><i class="el-icon-upload"></i>提交申请</span>
+          <el-menu-item-group>
+            <el-menu-item index="3-1"  @click="showRequestPage">请假</el-menu-item>
+            <el-menu-item index="3-2" @click="showRequestPage1">返校</el-menu-item>
+          </el-menu-item-group>
+        </el-submenu>
+        <el-menu-item index="4" @click="showPersonalMessage">
+          <i class="el-icon-s-custom"></i>
+          <span slot="title">个人</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
+
+<!--    &lt;!&ndash;里面有图标和账户名&ndash;&gt;-->
+<!--    <div style="width: 100%;height: 10%;">-->
+<!--      &lt;!&ndash;用户图标                 &ndash;&gt;-->
+<!--      <div style="float: left">-->
+<!--        <i class="el-icon-star-off"></i>-->
+<!--        <i class="el-icon-star-on"></i>-->
+<!--        <i class="el-icon-star-off"></i>-->
+<!--      </div>-->
+<!--      &lt;!&ndash;账户名                     &ndash;&gt;-->
+<!--      <div style="float: left;margin-left: 10%">-->
+<!--        <span>当前账户：</span>-->
+<!--        <span :model="p.num">{{p.num}}</span>-->
+<!--      </div>-->
+
+<!--      <div style="float: right">-->
+<!--        <i class="el-icon-star-off"></i>-->
+<!--        <i class="el-icon-star-on"></i>-->
+<!--        <i class="el-icon-star-off"></i>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;退出登录按钮和遇到问题链接&ndash;&gt;-->
+<!--    <div style="width: 100%;">-->
+<!--      <el-row>-->
+<!--        <el-button plain style="width: 100%"  @click="returnLoginPage"><i class="el-icon-switch-button">退出登录</i></el-button>-->
+<!--      </el-row>-->
+
+<!--      <div style="width: 100%;height: 40px"></div>-->
+
+<!--      <el-link type="primary" disabled style="margin-left: 40%">      遇到问题？</el-link>-->
+<!--    </div>-->
+
+  </div>
+
+  <!--    导入element-ui和vue-->
+  <script src="../js/vue.js"></script>
+  <script src="../element-ui/lib/index.js"></script>
+  <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el:"#caidan",
+      data(){
+        return{
+          p:{num:"", pageNum:1, pageSize:10},
+          deactive:"",
+          // deopens:3
+        }
+      },
+      created(){
+        if(localStorage.getItem("url") ==="../fitting/main1.html"){
+          this.deactive="2"
+        }else if(localStorage.getItem("url") ==="../fitting/main2.html"){
+          this.deactive="1"
+        }else if(localStorage.getItem("url") ==="../fitting/main3.html"){
+          this.deactive="3-1"
+        }else if(localStorage.getItem("url") ==="../fitting/main4.html"){
+          this.deactive="3-2"
+        }else if(localStorage.getItem("url") ==="../fitting/main5.html"){
+          this.deactive="4"
+        }
+      },
+      methods:{
+        handleOpen(key, keyPath) {
+          console.log(key, keyPath);
+        },
+        handleClose(key, keyPath) {
+          console.log(key, keyPath);
+        },
+        showInOutLog(){
+          window.parent.document.getElementById('tableFrame').src =  "../fitting/main1.html"
+        },
+        showNotice(){
+          // window.parent.document.getElementById('tableFrame').contentWindow.href=("")
+          window.parent.document.getElementById('tableFrame').src =  "../fitting/main2.html"
+        },
+        showRequestPage(){
+          window.parent.document.getElementById('tableFrame').src =  "../fitting/main3.html"
+        },
+        showRequestPage1(){
+          window.parent.document.getElementById('tableFrame').src =  "../fitting/main4.html"
+        },
+        showPersonalMessage(){
+          window.parent.document.getElementById('tableFrame').src =  "../fitting/main5.html"
+        },
+      }
+    })
+
+    //显示实时时间方法
+    setInterval(() => {
+      function showdata() {
+        var date=new Date();
+
+        //年
+        var year = date.getFullYear();
+        //月
+        var month =
+                date.getMonth() + 1 < 10
+                        ? "0" + (date.getMonth() + 1)
+                        : date.getMonth() + 1;
+        //日
+        var day =
+                date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+        //时
+        var hh =
+                date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+        //分
+        var mm =
+                date.getMinutes() < 10
+                        ? "0" + date.getMinutes()
+                        : date.getMinutes();
+        //秒
+        var ss =
+                date.getSeconds() < 10
+                        ? "0" + date.getSeconds()
+                        : date.getSeconds();
+
+        var nowTime;
+
+        nowTime =
+                year +
+                "年" +
+                month +
+                "月" +
+                day +
+                "日" +
+                " " +
+                hh +
+                ":" +
+                mm +
+                ":" +
+                ss;
+        return nowTime;
+      }
+      var d=showdata()
+      time.innerHTML=d
+    }, 1000);
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #design_name {
+            text-align: center;
+            margin-top: 10%;
+        }
+
+        .box {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 430px;
+            height: 100%;
+            margin: -300px 0 0 -215px;
+            border-radius: 20px;
+        }
+
+        .form-item {
+            position: relative;
+            width: 360px;
+            margin: 0 auto;
+            padding-bottom: 30px;
+        }
+
+        .box .form-item input {
+            width: 100%;
+            height: 48px;
+            padding-left: 20px;
+            border: 1px solid black;
+            border-radius: 25px;
+            font-size: 18px;
+        }
+
+        .box .form-item button {
+            position: relative;
+            margin-left: 10px;
+            width: 360px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 18px;
+            border: 3px solid black;
+        }
+
+        .reg-bar {
+            width: 360px;
+            margin: 20px auto;
+            font-size: 14px;
+        }
+
+        .reg-bar a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .reg-bar a:hover {
+            text-decoration: underline;
+        }
+
+        .reg-bar .reg {
+            float: left;
+        }
+
+        .reg-bar .forget {
+            float: right;
+        }
+
+        #switch {
+            position: relative;
+            margin-left: 135px;
+            width: 100px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 9px;
+            border: 3px solid darkolivegreen;
+            float: top;
+        }
+        body {
+            overflow: hidden;
+            position: fixed;
+            width:100%;
+            height:100%;
+            background: url(../pic/img1.jpg) no-repeat;
+            background-size:cover;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1 id="design_name">登录学生进出校管理系统</h1>
+    <BR>
+    <BR>
+    <BR>
+    <BR>
+    <BR>
+    <div class="form-item">
+        <input id="username" type="text" placeholder="账号" style="background-color: rgba(0,0,0,0)"/>
+        <span style="font-size: 10px; color: aqua;position: relative;margin-left: 10px" id="tips1"></span>
+    </div>
+
+    <div class="form-item">
+        <input id="password" type="password" placeholder="密码" style="background-color: rgba(0,0,0,0)"/>
+        <span  style="font-size: 10px; color: aqua;position: relative;margin-left: 10px" id="tips2"></span>
+    </div>
+
+    <BR>
+
+    <div class="form-item">
+        <button id="login" style="background-color: rgba(0,0,0,0)">登录</button>
+    </div>
+
+    <div class="reg-bar">
+        <button id="switch" style="background-color: rgba(0,0,0,0)">切换学生端</button>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+        document.getElementById("switch").onclick=function (){
+            window.location.href="loginPage.html";
+        }
+
+        document.getElementById("login").onclick=function (){
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+
+            if(username.toString().length === 0){
+                alert("用户名不可为空");
+            }else if(password.toString().length === 0){
+                alert("密码不可为空")
+            }else {
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/manageAccount/1/username/"+username+"/password/"+password
+                }).then(res=>{
+                    if(res.data.toString() === "true"){
+                        alert("true");
+                    }else{
+                        alert("用户名或密码错误");
+                    }
+                })
+            }
+        }
+    </script>
+
+</div>
+</body>
+</html>

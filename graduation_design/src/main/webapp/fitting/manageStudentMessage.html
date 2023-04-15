@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理学生信息</title>
+</head>
+<body>
+
+<div id="manageStudentMessage">
+
+
+    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item>
+            <el-input v-model="formInline.user" placeholder="账户名（学号）"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="selectByAccountName">查询</el-button>
+        </el-form-item>
+        <el-form-item>
+            <!--            <el-button type="primary" @click="">新增</el-button>-->
+            <el-popover
+                    placement="right"
+                    width="400"
+                    trigger="click">
+                <el-form ref="form" :model="form1" label-width="80px">
+                    <el-form-item label="姓名">
+                        <el-input  v-model="form1.studentName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学号">
+                        <el-input v-model="form1.studentNum"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性别">
+                        <el-input v-model="form1.sex"></el-input>
+                    </el-form-item>
+                    <el-form-item label="院系">
+                        <el-input v-model="form1.dep"></el-input>
+                    </el-form-item>
+                    <el-form-item label="专业">
+                        <el-input v-model="form1.major"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班级">
+                        <el-input v-model="form1.class"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话">
+                        <el-input v-model="form1.phone"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="reallyAdd">提交</el-button>
+                    </el-form-item>
+                </el-form>
+                <el-button slot="reference" @click="addRow">添加</el-button>
+                <el-button slot="reference" @click="deleteRows">批量删除</el-button>
+            </el-popover>
+        </el-form-item>
+    </el-form>
+
+    <template>
+        <el-table
+                ref="multipleTable"
+                :data="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @select="hhh"
+                @select-all="selectAll"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    prop="studentName"
+                    label="姓名"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.studentName}}</template>
+                <input ></input>
+            </el-table-column>
+            <el-table-column
+                    prop="studentNum"
+                    label="学号"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.studentNum}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="sex"
+                    label="性别"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.sex}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="dep"
+                    label="院系"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.dep}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="major"
+                    label="专业"
+                    width="120">
+                <template slot-scope="scope">{{scope.row.major}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="class"
+                    label="班级"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.banji}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="phone"
+                    label="班级"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.phone}}</template>
+            </el-table-column>
+            <el-table-column>
+                <template slot-scope="scope">
+                    <el-button @click="deleteRow(scope.$index, scope.row)">删除</el-button>
+                    <el-popover
+                            placement="right"
+                            width="400"
+                            trigger="click">
+                        <el-form ref="form" :model="form" label-width="80px">
+                            <el-form-item label="姓名">
+                                <el-input  v-model="form.studentName"></el-input>
+                            </el-form-item>
+                            <el-form-item label="学号">
+                                <el-input v-model="form.studentNum" disabled></el-input>
+                            </el-form-item>
+                            <el-form-item label="性别">
+                                <el-input v-model="form.sex"></el-input>
+                            </el-form-item>
+                            <el-form-item label="院系">
+                                <el-input v-model="form.dep"></el-input>
+                            </el-form-item>
+                            <el-form-item label="专业">
+                                <el-input v-model="form.major"></el-input>
+                            </el-form-item>
+                            <el-form-item label="班级">
+                                <el-input v-model="form.class"></el-input>
+                            </el-form-item>
+                            <el-form-item label="电话">
+                                <el-input v-model="form.phone"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="updatePassword">提交</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" @click="updateRow(scope.$index, scope.row)">修改</el-button>
+                    </el-popover>
+                </template>
+            </el-table-column>
+        </el-table>
+        <div style="margin-top: 20px">
+            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
+            <el-button @click="toggleSelection()">取消选择</el-button>
+        </div>
+    </template>
+
+    <!--底部表条-->
+    <div style="height: 5%;width: 100%;">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="p.pageNum"
+                :page-sizes="[5, 10,15,20]"
+                :page-size="p.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+        </el-pagination>
+    </div>
+
+</div>
+
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el:"#manageStudentMessage",
+        data(){
+            return{
+                tableData: [{
+                    studentName:"djj",
+                    studentNum:"1909141005",
+                    sex:"male",
+                    age:"22",
+                    major:"adou",
+                    dep:"数学与计算机",
+                    banji:"class four",
+                    phone:"1234567890"
+                }],
+                multipleSelection: [],
+                //没改数据名
+                formInline: {
+                    user: '',
+                },
+                p:{
+                    num:"",
+                    pageNum:1,
+                    pageSize:10
+                },
+                total:99,
+                //修改的表单
+                form:{
+                    studentName:"djj",
+                    studentNum:"1909141005",
+                    sex:"male",
+                    age:"22",
+                    dep:"数学与计算机",
+                    class:"class four",
+                    phone:"1234567890",
+                    major:"",
+                },
+                //新增的表单
+                form1:{
+                    studentName:"djj",
+                    studentNum:"1909141005",
+                    sex:"male",
+                    age:"22",
+                    dep:"数学与计算机",
+                    class:"class four",
+                    phone:"1234567890",
+                    major:"",
+                },
+                needDeletes:{
+
+                }
+
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+            localStorage.setItem("adminurl","../fitting/manageStudentMessage.html");
+        },
+        methods: {
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            onSubmit() {
+                console.log('submit!');
+            },
+            handleSizeChange(val) {
+                this.p.pageSize=val;
+                this.getAll();
+            },
+            handleCurrentChange(val) {
+                this.p.pageNum=val;
+                this.getAll();
+            },
+            getAccountNum(){
+                this.p.num=localStorage.getItem("a-key");
+            },
+            getAll(){
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/studentMessage/2/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                }).then(res=>{
+                    this.tableData=res.data;
+                })
+                this.getTotal()
+            },
+            deleteRow(index,row){
+                var accountName = row.studentNum;
+                axios({
+                    method:"delete",
+                    url:"http://localhost:8080/graduation_design/studentMessage/1",
+                    params:{
+                        num:accountName
+                    }
+                }).then(res=>{
+                    if(res.data === "true"){
+                        alert("success")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+
+            },
+            updateRow(index,row){
+                this.form.studentName = row.studentName;
+                this.form.studentNum = row.studentNum;
+                this.form.sex = row.sex;
+                this.form.age = row.age;
+                this.form.dep = row.dep;
+                this.form.class = row.banji;
+                this.form.phone = row.phone;
+                this.form.major = row.major.toString();
+            },
+            updatePassword(){
+                var studentName= this.form.studentName;
+                var studentNum = this.form.studentNum;
+                var sex= this.form.sex;
+                var age= this.form.age;
+                var dep= this.form.dep;
+                var banji= this.form.class;
+                var phone= this.form.phone;
+                var major = this.form.major;
+                if(studentName.length === 0 || studentNum.length === 0 || sex.length === 0 || dep.length === 0|| banji.length ===0 || phone.length === 0 || major.length === 0){
+                    alert("输入框未填完整")
+                }else{
+                    //像后端发送请求 修改数据
+                    axios({
+                        method:"put",
+                        url:"http://localhost:8080/graduation_design/studentMessage/1",
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        },
+                        params:{
+                            num:studentNum,
+                            name:studentName,
+                            sex:sex,
+                            age:age,
+                            dep:dep,
+                            banji:banji,
+                            phone:phone,
+                            major:major
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true" ){
+                            alert("修改成功");
+                        }
+                    }).finally(()=>{
+                        this.getAll()
+                    })
+                }
+            },
+            addRow(){
+            },
+            reallyAdd(){
+                var studentName= this.form1.studentName;
+                var studentNum = this.form1.studentNum;
+                var sex= this.form1.sex;
+                var age= this.form1.age;
+                var dep= this.form1.dep;
+                var banji= this.form1.class;
+                var phone= this.form1.phone;
+                var major = this.form1.major;
+
+
+                if(studentName.length === 0 || studentNum.length === 0 || sex.length === 0 || dep.length === 0|| banji.length ===0 || phone.length === 0 || major.length === 0){
+                    alert("输入框未填完整")
+                }else{
+                    //像后端发送请求
+                    axios({
+                        method:"post",
+                        url:"http://localhost:8080/graduation_design/studentMessage/3",
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        },
+                        data:{
+                            num:studentNum,
+                            name:studentName,
+                            sex:sex,
+                            dep:dep,
+                            banji:banji,
+                            phone:phone,
+                            major:major
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true" ){
+                            alert("添加成功");
+                        }else{
+                            alert("添加失败")
+                        }
+                    }).finally(()=>{
+                        this.getAll()
+                    })
+                }
+
+            },
+            selectByAccountName(){
+                if(this.formInline.user === ""){
+                    alert("请输入数据查询")
+                }else{
+                    var studentNum = this.formInline.user;
+                    //查询通过用户名
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/studentMessage/3/studentNum/"+studentNum,
+                    }).then(res=>{
+                        if(Object.keys(res.data).toString() === "0"){
+                            alert("无此学号数据")
+                        }else{
+                            this.tableData = res.data;
+                        }
+                    })
+                }
+            },
+            deleteRows(){
+                var json = JSON.stringify(this.needDeletes);
+                alert(json)
+                axios({
+                    method:"delete",
+                    url:"http://localhost:8080/graduation_design/studentMessage/2",
+                    data:JSON.parse(json),
+                    header:{
+                        'Content-Type':'application/json' //规定传递的参数格式为json
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "true"){
+                        alert("删除成功")
+                    }else {
+                        alert("删除失败")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+            },
+            hhh(selection,row){
+                this.needDeletes = selection;
+            },
+            selectAll(selection){
+                this.needDeletes = selection;
+            },
+            getTotal(){
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/studentMessage/4",
+                }).then(res=>{
+                    this.total = res.data;
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

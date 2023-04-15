@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理管理员账户</title>
+</head>
+<body>
+
+<div id="manageAdminAccount">
+
+
+    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item>
+            <el-input v-model="formInline.user" placeholder="账户名"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="selectByAccountName">查询</el-button>
+        </el-form-item>
+        <el-form-item>
+            <!--            <el-button type="primary" @click="">新增</el-button>-->
+            <el-popover
+                    placement="right"
+                    width="400"
+                    trigger="click">
+                <el-form ref="form" :model="form1" label-width="80px">
+                    <el-form-item label="账户名">
+                        <el-input  v-model="form1.newAccountName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input v-model="form1.newPassword"></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码">
+                        <el-input v-model="form1.reNewPassword"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="reallyAdd">提交</el-button>
+                    </el-form-item>
+                </el-form>
+                <el-button slot="reference" @click="addRow">添加</el-button>
+                <el-button slot="reference" @click="deleteRows">批量删除</el-button>
+            </el-popover>
+        </el-form-item>
+    </el-form>
+
+    <template>
+        <el-table
+                ref="multipleTable"
+                :data="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @select="hhh"
+                @select-all="selectAll"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    prop="accountName"
+                    label="账号"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.username}}</template>
+                <input ></input>
+            </el-table-column>
+            <el-table-column
+                    prop="password"
+                    label="密码"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.password}}</template>
+            </el-table-column>
+            <el-table-column>
+                <template slot-scope="scope">
+                    <el-button @click="deleteRow(scope.$index, scope.row)">删除</el-button>
+                    <el-popover
+                            placement="right"
+                            width="400"
+                            trigger="click">
+                        <el-form ref="form" :model="form" label-width="80px">
+                            <el-form-item label="账户名">
+                                <el-input  v-model="form.newAccountName"></el-input>
+                            </el-form-item>
+                            <el-form-item label="密码">
+                                <el-input v-model="form.newPassword"></el-input>
+                            </el-form-item>
+                            <el-form-item label="确认密码">
+                                <el-input v-model="form.reNewPassword"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="updatePassword">提交</el-button>
+                            </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" @click="updateRow(scope.$index, scope.row)">修改</el-button>
+                    </el-popover>
+                    <!--                    <template>-->
+                    <!--                        <el-button type="text" @click="updateRow(scope.$index, scope.row)">修改</el-button>-->
+                    <!--                    </template>-->
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+
+    <!--底部表条-->
+    <div style="height: 5%;width: 100%;">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="p.pageNum"
+                :page-sizes="[5, 10,15,20]"
+                :page-size="p.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+        </el-pagination>
+    </div>
+
+</div>
+
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el:"#manageAdminAccount",
+        data(){
+            return{
+                tableData: [{
+                    username: '1909141005',
+                    password: 'diao01...',
+                }],
+                multipleSelection: [],
+                formInline: {
+                    user: '',
+                },
+                p:{
+                    num:"",
+                    pageNum:1,
+                    pageSize:10
+                },
+                total:99,
+                //修改的表单
+                form:{
+                    newAccountName:"账户名为学号，不可更改",
+                    newPassword:"hhh",
+                    reNewPassword:"hhh"
+                },
+                //新增的表单
+                form1:{
+                    newAccountName:"adou",
+                    newPassword:"hhh",
+                    reNewPassword:"hhh"
+                },
+                needDeletes:{
+
+                }
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+            localStorage.setItem("adminurl","../fitting/manageAdminAccount.html");
+        },
+        methods: {
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            onSubmit() {
+                console.log('submit!');
+            },
+            handleSizeChange(val) {
+                this.p.pageSize=val;
+                this.getAll();
+            },
+            handleCurrentChange(val) {
+                this.p.pageNum=val;
+                this.getAll();
+            },
+            getAccountNum(){
+                this.p.num=localStorage.getItem("a-key");
+            },
+            getAll(){
+                this.getAccountNum();
+                //查询数据
+                var num =this.p.num;
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/manageAccount/2/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                }).then(res=>{
+                    this.tableData=res.data;
+                })
+                this.getTotal();
+            },
+            deleteRow(index,row){
+                var accountName = row.username;
+                axios({
+                    method:"delete",
+                    url:"http://localhost:8080/graduation_design/manageAccount/1",
+                    params:{
+                        num:accountName
+                    }
+                }).then(res=>{
+                    if(res.data === "true"){
+                        alert("success")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+
+            },
+            updateRow(index,row){
+                this.form.newAccountName = row.username;
+            },
+            updatePassword(){
+                var accountName = this.form.newAccountName;
+                var newPassword = this.form.newPassword;
+                var reNewPassword = this.form.reNewPassword;
+                if(newPassword.toString() !== reNewPassword.toString()){
+                    alert("前后密码需一致")
+                }else{
+                    //像后端发送请求 修改密码
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/manageAccount/3/accountName/"+accountName+"/accountPassword/"+newPassword,
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true" ){
+                            alert("修改成功");
+                        }
+                    }).finally(()=>{
+                        this.getAll()
+                    })
+                }
+            },
+            addRow(){
+                alert("开始新增")
+            },
+            reallyAdd(){
+                var accountName = this.form1.newAccountName;
+                var newPassword = this.form1.newPassword;
+                var reNewPassword = this.form1.reNewPassword;
+                if(newPassword.toString() !== reNewPassword.toString()){
+                    alert("前后密码需一致")
+                }else{
+                    //像后端发送请求 添加用户
+                    axios({
+                        method:"post",
+                        url:"http://localhost:8080/graduation_design/manageAccount/1/accountName/"+accountName+"/accountPassword/"+newPassword,
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true" ){
+                            alert("添加成功");
+                        }
+                    }).finally(()=>{
+                        this.getAll()
+                    })
+                }
+            },
+            selectByAccountName(){
+                alert(this.formInline.user);
+                var accountName = this.formInline.user;
+                //查询通过用户名
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/manageAccount/4/accountName/"+accountName,
+                    headers:{
+                        "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                    }
+                }).then(res=>{
+                    this.tableData = res.data;
+                })
+            },
+            deleteRows(){
+                var json = JSON.stringify(this.needDeletes);
+                alert(json)
+                axios({
+                    method:"delete",
+                    url:"http://localhost:8080/graduation_design/manageAccount/2",
+                    data:JSON.parse(json),
+                    header:{
+                        'Content-Type':'application/json' //规定传递的参数格式为json
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "true"){
+                        alert("删除成功")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+            },
+            hhh(selection,row){
+                this.needDeletes = selection;
+            },
+            selectAll(selection){
+                this.needDeletes = selection;
+            },
+            getTotal(){
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/manageAccount/5/num/"+1,
+                }).then(res=>{
+                    this.total = res.data;
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

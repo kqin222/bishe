@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function(){
+            $("#a1").click(function(){
+                var name= $(this).attr("name");
+                location.hash = name;//设置锚点
+            })
+            $("#a2").click(function(){
+                var name= $(this).attr("name");
+                location.hash = name;//设置锚点
+            })
+        })
+        //function loadIframe(url){
+        //var u = window.location.href;
+        //var end = u.indexOf("#");
+        //var rurl = u.substring(0,end);
+        设置新的锚点
+        //window.location.href = rurl + "#" + url;
+        //}
+    </script>
+</head>
+<body>
+<a href="a1.html#1" id="a1" name="a1.html" target="i">1</a>
+<a href="a2.html" id="a2" name="a2.html" target="i">2</a>
+<iframe src="" id="iframe" name="i"></iframe>
+<script type="text/javascript">
+    window.onhashchange = function(){//监听锚点的变化
+        var hash = location.hash;
+        hash = hash.substring(1,hash.length);
+        alert(hash);
+        $("#iframe").attr("src",hash);
+    }
+    document.addEventListener('DOMContentLoaded', function () {//刷新
+        var hash = location.hash;
+        var url = hash.substring(1,hash.length);
+        $("#iframe").attr("src", url);
+    }, false)
+</script>
+</body>
+</html>

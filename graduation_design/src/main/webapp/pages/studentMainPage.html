@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+        window.onload=function (){
+            if(localStorage.getItem("url")!==""){
+                document.getElementById('tableFrame').contentWindow.location.href=localStorage.getItem("url");
+            }else{
+                alert("kong")
+            }
+        }
+    </script>
+
+  <style>
+    .el-header, .el-footer {
+      background-color: slategrey;
+      color: #333;
+      text-align: center;
+      line-height: 60px;
+    }
+
+    .el-aside {
+      background-color: white;
+      color: #333;
+      text-align: center;
+      line-height: 200px;
+    }
+
+    .el-main {
+      background-color: #E9EEF3;
+      color: #333;
+      text-align: center;
+      line-height: 160px;
+    }
+
+    body > .el-container {
+      margin-bottom: 40px;
+    }
+
+    .el-container:nth-child(5) .el-aside,
+    .el-container:nth-child(6) .el-aside {
+      line-height: 260px;
+    }
+
+    .el-container:nth-child(7) .el-aside {
+      line-height: 320px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="appStudentMain">
+  <el-container style="height: 940px;width: 1860px; border: 1px solid #eee">
+
+    <el-aside  style="">
+<!--放置测边框-->
+        <iframe id="side" src="../fitting/side1.html" style="width: 98%;height: 80%;" frameborder="0"></iframe>
+
+    </el-aside>
+
+    <el-container>
+      <el-header style="text-align: right; font-size: 12px;">
+<!--随便放些东西-->
+          <h4 style="float: left;font-size: 20px;margin-top: 0px">进出校管理系统学生端</h4>
+
+          <div style="width: 100%">
+              <el-dropdown>
+                  <i class="el-icon-setting" style="margin-top: 10px"></i>
+                  <el-dropdown-menu slot="dropdown" x-placement="bottom">
+                      <el-dropdown-item @click.native="changePassword">更改密码</el-dropdown-item>
+                      <el-dropdown-item @click.native="outLogin">退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+              </el-dropdown>
+              <span style="" :model="num">{{num}}</span>
+          </div>
+<!--          <iframe src="../fitting/head1.html"  frameborder="0" scrolling="no" style="width: 100%;height: 100%;background-color: #409EFF" ></iframe>-->
+      </el-header>
+
+      <el-main>
+<!--放置表格-->
+      <iframe id="tableFrame" name="mainTable" src="../fitting/main0.html" style="height: 100%;width: 100%" frameborder="0" scrolling="no"></iframe>
+
+      </el-main>
+    </el-container>
+
+  </el-container>
+</div>
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+
+<script>
+
+  new Vue({
+    el:"#appStudentMain",
+      data() {
+          return {
+              num:"12"
+          }
+      },
+      //Vue对象初始化完成后自动执行
+      created(){
+          localStorage.setItem("count","0");
+          this.getNum();
+      },
+      methods: {
+          getNum(){
+              var num = localStorage.getItem("key");
+              this.num=num;
+          },
+          changePassword(){
+              window.location.href="checkIdentity.html"
+          },
+          outLogin(){
+              window.location.href="loginPage.html"
+          }
+      },
+  })
+
+</script>
+
+</body>
+</html>

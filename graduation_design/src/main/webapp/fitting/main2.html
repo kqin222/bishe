@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .demo-table-expand {
+            font-size: 0;
+        }
+        .demo-table-expand label {
+            width: 90px;
+            color: #99a9bf;
+        }
+        .demo-table-expand .el-form-item {
+            margin-right: 0;
+            margin-bottom: 0;
+            width: 50%;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="main2">
+        <!--里面装了查询表头-->
+        <div id="tableHead" style="float: left;width: 79%;height: 9%;">
+
+            <!--空格div-->
+            <div style="float: top;width: 50%;height: 22%;">
+
+            </div>
+            <!--查询表头-->
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+
+                <el-form-item label="日期">
+<!--                    <el-input v-model="formInline.date" placeholder="日期"></el-input>-->
+                    <template>
+                        <div class="block">
+                            <el-date-picker
+                                    v-model="formInline.date"
+                                    type="date"
+                                    placeholder="选择日期"
+                                    value-format="yyyy-MM-dd">
+                            </el-date-picker>
+                        </div>
+                    </template>
+                </el-form-item>
+
+                <el-form-item label="状态">
+                    <el-input v-model="formInline.checked" placeholder="通过或拒绝"></el-input>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">查询</el-button>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button plain @click="onCancel">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <!--    里面有表格和底部表条-->
+        <div style="float: left;width: 79%;height: 94%;">
+            <!--表格-->
+            <div style="height: 95%;width: 100%;">
+                <template>
+                    <el-table
+                            id="table"
+                            :data="tableData"
+                            style="width: 100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="props">
+                                <el-form label-position="left" inline class="demo-table-expand">
+                                    <el-form-item label="目的地址">
+                                        <span>{{ props.row.purposeAddress }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="申请日期">
+                                        <span>{{ props.row.date }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="开始时间">
+                                        <span>{{ props.row.outTime }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="结束时间">
+                                        <span>{{ props.row.inTime }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="原因">
+                                        <span>{{ props.row.reason }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="审批意见">
+                                        <span>{{ props.row.myResponse }}</span>
+                                    </el-form-item>
+                                    <el-form-item label="状态">
+                                        <span>{{ props.row.checked }}</span>
+                                    </el-form-item>
+                                </el-form>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="日期"
+                                prop="date">
+                        </el-table-column>
+                        <el-table-column
+                                label="开始地"
+                                prop="startAddress">
+                        </el-table-column>
+                        <el-table-column
+                                label="目的地"
+                                prop="purposeAddress">
+                        </el-table-column>
+                        <el-table-column
+                                label="原因"
+                                prop="reason">
+                        </el-table-column>
+                        <el-table-column
+                                label="状态"
+                                prop="checked">
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+<!--                                <el-button-->
+<!--                                        size="mini"-->
+<!--                                        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>-->
+
+
+                                <el-dropdown trigger="click">
+                                    <el-button type="mini" @click="handleEdit(scope.$index, scope.row)">
+                                        操作<i class="el-icon-arrow-down el-icon--right"></i>
+                                    </el-button>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item ><el-button type="mini" @click="cuicu" :disabled="disabled1">催促</el-button></el-dropdown-item>
+                                        <el-dropdown-item ><el-button type="mini" @click="zaiciRequest" :disabled="disabled2">再次申请</el-button></el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </div>
+            <!--底部表条-->
+            <div style="height: 5%;width: 100%;">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="p.pageNum"
+                        :page-sizes="[5, 10,15,20]"
+                        :page-size="p.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+        </div>
+    </div>
+
+    <!--    导入element-ui和vue-->
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el:"#main2",
+            data(){
+                return{
+                    tableData: [{
+                        date: '????',
+                        address: '好滋好味鸡蛋仔',
+                        reason: '荷兰优质淡奶，奶香浓而不腻',
+                        outTime: '王小虎夫妻店',
+                        inTime: '10333',
+                        checked:'被拒绝'
+                    },{
+                        date: '????12',
+                        address: '好滋好味鸡蛋仔',
+                        reason: '荷兰优质淡奶，奶香浓而不腻',
+                        outTime: '王小虎夫妻店',
+                        inTime: '10333',
+                        checked:'未处理'
+                    }],
+                    formInline: {
+                        checked: '',
+                        date:''
+                    },
+                    p:{
+                        num:"",
+                        pageNum:1,
+                        pageSize:10
+                    },
+                    total:15,
+                    disabled1:true,
+                    disabled2:true,
+                    isSchool:"",
+                    needChangeCheckedDate:"",
+                    value1:""
+                }
+            },
+            //Vue对象初始化完成后自动执行
+            created(){
+                this.getAll();
+                localStorage.setItem("url","../fitting/main2.html");
+            },
+            methods:{
+                onSubmit() {
+                    var searchChecked = this.formInline.checked;
+                    var searchDate = this.formInline.date;
+                    //查询数据
+                    var num =this.p.num;
+                    var pageNum = this.p.pageNum;
+                    var pageSize = this.p.pageSize;
+                    // 只查状态
+                    if (searchChecked.toString().length !== 0 && searchDate.toString().length === 0){
+                        axios({
+                            method:"get",
+                            headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                            url:"http://localhost:8080/graduation_design/inOutLog/4/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/checked/"+searchChecked,
+                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                        // 只查日期
+                    }else if (searchChecked.toString().length === 0 && searchDate.toString().length !== 0){
+                        axios({
+                            method:"get",
+                            headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                            url:"http://localhost:8080/graduation_design/inOutLog/8/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/date/"+searchDate.toString(),
+                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                    }else if (searchChecked.toString().length !== 0 && searchDate.toString().length !== 0){
+                        // search by both
+                        axios({
+                            method:"get",
+                            headers: {'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                            url:"http://localhost:8080/graduation_design/inOutLog/9/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize+"/date/"+searchDate.toString()+"/checked/"+searchChecked,
+                        }).then(res=>{
+                            this.tableData=res.data;
+                        })
+                    }else{
+                        alert("查询请输入数据")
+                    }
+                },
+                onCancel(){
+                    this.getAll();
+                },
+                getAll(){
+                    this.getAccountNum();
+                    //查询数据
+                    var num =this.p.num;
+                    var pageNum = this.p.pageNum;
+                    var pageSize = this.p.pageSize;
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/3/num/"+num+"/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                    }).then(res=>{
+                        this.tableData=res.data;
+                    })
+                    this.getTotal();
+                },
+                handleSizeChange(val) {
+                    this.p.pageSize=val;
+                    this.getAll();
+                },
+                handleCurrentChange(val) {
+                    this.p.pageNum=val;
+                    this.getAll();
+                },
+                getAccountNum(){
+                    var num = localStorage.getItem("key");
+                    this.p.num=num;
+                },
+                cuicu(){
+                    //提交请求将数据checked改为3 代表被催促了
+                    //发送请求 更改checked为3
+                    var outDate = this.needChangeCheckedDate;
+                    var num = this.p.num;
+                    axios({
+                        method:"put",
+                        url:"http://localhost:8080/graduation_design/inOutLog/1",
+                        params:{
+                            date:outDate,
+                            num:num
+                        },headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "success"){
+                            alert("催促成功");
+                        }else {
+                            alert("催促失败");
+                        }
+                    })
+                },
+                zaiciRequest(){
+                    //再次跳转至请求页面
+                    if(this.isSchool.toString() === "1"){
+                        window.parent.document.getElementById('tableFrame').src =  "../fitting/main3.html"
+                        localStorage.setItem("url","../fitting/main3.html");
+                        window.parent.location.reload();
+                    }else{
+                        window.parent.document.getElementById('tableFrame').src =  "../fitting/main4.html"
+                        localStorage.setItem("url","../fitting/main4.html");
+                        window.parent.location.reload();
+                    }
+                },
+                handleEdit(index, row) {
+                    this.needChangeCheckedDate = row.outTime.toString();//记录下需要更改的check的id
+
+                    this.disabled1 = true;
+                    this.disabled2 = true;
+                    if (row.address === "学校地址"){
+                        this.isSchool = "1";
+                    }else{
+                        this.isSchool = "0";
+                    }
+                    //如果checked是同意 则无操作提醒以下。。。如果checked是拒绝 将再次请求点亮。。。如果checked是未查看 将催促点亮
+                    if (row.checked.toString() === "已通过"){
+                        alert("你的请求已被同意，规划你的出行吧")
+                    } else if (row.checked.toString() === "被拒绝"){
+                        this.disabled2 = false;
+                    }else if(row.checked.toString() === "未处理"){
+                        this.disabled1 = false;
+                    }else if(row.checked.toString() === "已经催促"){
+                        alert("你的请求已催促，请耐心等待管理员处理")
+                    }
+                },
+                getTotal(){
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/18/num/"+this.p.num,
+                    }).then(res=>{
+                        this.total = res.data;
+                    })
+                }
+            }
+        })
+    </script>
+
+</body>
+</html>

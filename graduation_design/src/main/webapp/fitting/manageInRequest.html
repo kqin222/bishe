@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理进校请求</title>
+</head>
+<body>
+<style>
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
+    }
+</style>
+
+<div id="manageInRequest">
+
+
+    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item>
+            <el-input v-model="formInline.user" placeholder="姓名"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="selectByAccountName">查询</el-button>
+            <el-button  @click="getAll">取消查询</el-button>
+        </el-form-item>
+        <el-form-item>
+            <el-popover
+                    placement="right"
+                    width="400"
+                    trigger="click">
+                <el-form ref="form" :model="form" label-width="80px">
+                    <el-form-item label="批量意见">
+                        <el-input  v-model="form.myResponses"></el-input>
+                    </el-form-item>
+                </el-form>
+                <el-button slot="reference" @click="writeResponse">批量意见</el-button>
+                <el-button slot="reference" @click="agreeRows">批量同意</el-button>
+                <el-button slot="reference" @click="rejectRows">批量拒绝</el-button>
+            </el-popover>
+        </el-form-item>
+    </el-form>
+
+    <template>
+        <el-table
+                ref="multipleTable"
+                :data="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @select="hhh"
+                :row-class-name="tableRowClassName"
+                @select-all="selectAll"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    prop="id"
+                    label="序号"
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="date"
+                    label="申请日期"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.date}}</template>
+                <input ></input>
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="姓名"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.name}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="num"
+                    label="学号"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.num}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="phone"
+                    label="电话"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.phone}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="outTime"
+                    label="预计出发时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.outTime}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="inTime"
+                    label="预计到达时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.inTime}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="startAddress"
+                    label="起始地址"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.startAddress}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="purposeAddress"
+                    label="目的地址"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.purposeAddress}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="reason"
+                    label="原因"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.reason}}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="checked"
+                    label="状态"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.checked}}</template>
+            </el-table-column>
+            <el-table-column width="300">
+                <template slot-scope="scope">
+                    <el-popover
+                            placement="right"
+                            width="400"
+                            trigger="click">
+                        <el-form ref="form" :model="form" label-width="80px">
+                            <el-form-item label="意见">
+                                <el-input  v-model="form.myResponse"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <el-button slot="reference" @click="writeResponse">意见</el-button>
+                        <el-button slot="reference" @click="agree(scope.$index, scope.row)">同意</el-button>
+                        <el-button slot="reference" @click="reject(scope.$index, scope.row)">拒绝</el-button>
+                    </el-popover>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+
+    <!--底部表条-->
+    <div style="height: 5%;width: 100%;">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="p.pageNum"
+                :page-sizes="[5, 10,15,20]"
+                :page-size="p.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+        </el-pagination>
+    </div>
+
+</div>
+
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el:"#manageInRequest",
+        data(){
+            return{
+                tableData: [],
+                multipleSelection: [],
+                formInline: {
+                    user: '',
+                },
+                p:{
+                    num:"",
+                    pageNum:1,
+                    pageSize:10
+                },
+                total:99,
+                //修改的表单
+                form:{
+                    myResponse:"hhh",
+                    myResponses:"hhh",
+                    // date:"",
+                    // num:""
+                },
+                needDeletes:{}
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+            localStorage.setItem("adminurl","../fitting/manageInRequest.html");
+        },
+        methods: {
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            onSubmit() {
+                console.log('submit!');
+            },
+            handleSizeChange(val) {
+                this.p.pageSize=val;
+                this.getAll();
+            },
+            handleCurrentChange(val) {
+                this.p.pageNum=val;
+                this.getAll();
+            },
+            getAccountNum(){
+                this.p.num=localStorage.getItem("a-key");
+            },
+            getAll(){
+                //查询数据
+                var pageNum = this.p.pageNum;
+                var pageSize = this.p.pageSize;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/11/pageNum/"+pageNum+"/pageSize/"+pageSize,
+                }).then(res=>{
+                    this.tableData=res.data;
+                    console.log(res)
+                    this.total = res.data.length
+                })
+                this.getTotal()
+            },
+            writeResponse(){
+                this.form.myResponse = ""
+            },
+            agree(index,row){
+                alert(this.form.myResponse)
+                //将请求checked属性变为2
+                axios({
+                    method:"put",
+                    url:"http://localhost:8080/graduation_design/inOutLog/2",
+                    params:{
+                        date:row.date,
+                        num:row.num,
+                        myResponse: this.form.myResponse
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "success"){
+                        alert("已经批准")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+                this.form.myResponse = ""
+            },
+            reject(index,row){
+                //将请求checked属性变为2
+                axios({
+                    method:"put",
+                    url:"http://localhost:8080/graduation_design/inOutLog/3",
+                    params:{
+                        date:row.date,
+                        num:row.num,
+                        myResponse: this.form.myResponse
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "success"){
+                        alert("已经拒绝")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+                this.form.myResponse = ""
+            },
+            selectByAccountName(){
+                var accountName = this.formInline.user;
+                //查询通过姓名
+                if(accountName.toString().length === 0){
+                    alert("请输入姓名查询")
+                }else{
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/graduation_design/inOutLog/12/accountName/"+accountName,
+                        headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        this.tableData = res.data;
+                    })
+                }
+            },
+            agreeRows(){
+                var json = JSON.stringify(this.needDeletes);
+                alert(json)
+                axios({
+                    method:"put",
+                    url:"http://localhost:8080/graduation_design/inOutLog/4",
+                    data:JSON.parse(json),
+                    params:{
+                        myResponses: this.form.myResponses
+                    },
+                    header:{
+                        'Content-Type':'application/json' //规定传递的参数格式为json
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "success"){
+                        alert("同意成功")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+            },
+            rejectRows(){
+                var json = JSON.stringify(this.needDeletes);
+                alert(json)
+                axios({
+                    method:"put",
+                    url:"http://localhost:8080/graduation_design/inOutLog/5",
+                    data:JSON.parse(json),
+                    params:{
+                        myResponses: this.form.myResponses
+                    },
+                    header:{
+                        'Content-Type':'application/json' //规定传递的参数格式为json
+                    }
+                }).then(res=>{
+                    if(res.data.toString() === "success"){
+                        alert("拒绝成功")
+                    }
+                }).finally(()=>{
+                    this.getAll()
+                })
+            },
+            hhh(selection,row){
+                this.needDeletes = selection;
+            },
+            selectAll(selection){
+                this.needDeletes = selection;
+            },
+            //黄色显示催促
+            tableRowClassName({row, rowIndex}) {
+                if (row.checked === "已催促") {
+                    return 'warning-row';
+                }
+                return '';
+            },
+            getTotal(){
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/20",
+                }).then(res=>{
+                    this.total = res.data;
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

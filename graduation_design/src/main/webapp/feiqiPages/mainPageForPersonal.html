@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="app13" style="height: 900px;width: 1900px">
+
+        <!--左侧导航条-->
+        <div id="daohanglan" style="float: left;width: 20%;height: 100%;">
+            <div style="width: 100%;height: 9%;overflow: hidden;background-color: white;border-bottom: 1px solid black">
+                <!--显示时间-->
+                <i class="el-icon-time" style="font-size: 30px;float: left;margin-top: 10px"></i>
+                <h4 style="float: left;margin-top: 40px;margin-left: 20px" id="time">time</h4>
+            </div>
+            <!--菜单选项-->
+            <div style="width: 100%;height: 50%;float: top">
+                <el-menu
+                        default-active="4"
+                        @open="handleOpen"
+                        @close="handleClose"
+                        unique-opened="true"
+                        class="el-menu-vertical-demo">
+                    <el-menu-item index="1" @click="showNotice">
+                        <i class="el-icon-chat-round"></i>
+                        <span slot="title">通知</span>
+                    </el-menu-item>
+                    <el-menu-item index="2" @click="showInOutLog">
+                        <i class="el-icon-search"></i>
+                        <span slot="title">进出记录</span>
+                    </el-menu-item>
+                    <el-submenu index="3">
+                        <span slot="title"><i class="el-icon-upload"></i>提交申请</span>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-1"  @click="showRequestPage">请假</el-menu-item>
+                            <el-menu-item index="3-2">返校</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-menu-item index="4" @click="showPersonalMessage">
+                        <i class="el-icon-s-custom"></i>
+                        <span slot="title">个人</span>
+                    </el-menu-item>
+                </el-menu>
+            </div>
+            <!--里面有图标和账户名-->
+            <div style="width: 100%;height: 10%;">
+                <!--用户图标                 -->
+                <div style="float: left">
+                    <i class="el-icon-star-off"></i>
+                    <i class="el-icon-star-on"></i>
+                    <i class="el-icon-star-off"></i>
+                </div>
+                <!--账户名                     -->
+                <div style="float: left;margin-left: 10%">
+                    <span>当前账户：</span>
+                    <span :model="p.num">{{p.num}}</span>
+                </div>
+
+                <div style="float: right">
+                    <i class="el-icon-star-off"></i>
+                    <i class="el-icon-star-on"></i>
+                    <i class="el-icon-star-off"></i>
+                </div>
+            </div>
+            <!--退出登录按钮和遇到问题链接-->
+            <div style="width: 100%;margin-top: 200px">
+                <el-row>
+                    <el-button plain style="width: 100%"  @click="returnLoginPage"><i class="el-icon-switch-button">退出登录</i></el-button>
+                </el-row>
+
+                <div style="width: 100%;height: 40px"></div>
+
+                <el-link type="primary" disabled style="margin-left: 40%">      遇到问题？</el-link>
+            </div>
+        </div>
+
+        <div style="float: left;width: 79%;height: 100%;border-left: 1px solid black">
+            <div style="width: 50%;height: 50%">
+                <el-form ref="form" :model="form" label-width="80px" :disabled="disabled">
+                    <el-form-item label="姓名">
+                        <el-input v-model="form.studentName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性别">
+                        <el-radio-group v-model="form.sex">
+                            <el-radio label="男"></el-radio>
+                            <el-radio label="女"></el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="学号" >
+                        <el-input v-model="form.studentNum" readonly></el-input>
+                    </el-form-item>
+                    <el-form-item label="院系">
+                        <el-input v-model="form.dep"></el-input>
+                    </el-form-item>
+                    <el-form-item label="专业">
+                        <el-input v-model="form.major"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班级">
+                        <el-input v-model="form.banji"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话">
+                        <el-input v-model="form.phone"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="onSubmit">修改信息</el-button>
+                        <el-button @click="cancel">取消</el-button>
+                    </el-form-item>
+                </el-form>
+                <div>
+                    <button @click="startUpdate">修改信息</button>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!--    导入element-ui和vue-->
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el:"#app13",
+        data() {
+            return {
+                form: {
+                    studentName: '',
+                    sex:'',
+                    studentNum:'',
+                    dep:'',
+                    major:'',
+                    banji:'',
+                    phone:''
+                },
+                p:{num:""},
+                disabled:true,
+            }
+        },
+        //Vue对象初始化完成后自动执行
+        created(){
+            this.getAll();
+        },
+        methods: {
+            //提交修改
+            onSubmit() {
+                var num = this.form.studentNum;
+                var name = this.form.studentName;
+                var sex = this.form.sex;
+                var dep = this.form.dep;
+                var major = this.form.major;
+                var banji = this.form.banji;
+                var phone = this.form.phone;
+                if(name.toString().length === 0){
+                    alert("姓名不可为空")
+                }else if (sex.toString().length === 0){
+                    alert("性别不可为空")
+                }else if (dep.toString().length === 0){
+                    alert("院系不可为空")
+                }else if (major.toString().length === 0){
+                    alert("专业不可为空")
+                }else if (banji.toString().length === 0){
+                    alert("班级不可为空")
+                }else if(phone.toString().length === 0){
+                    alert("电话不可为空")
+                }else{
+                    //发送请求 更改个人信息
+                    axios({
+                        method:"post",
+                        url:"http://localhost:8080/graduation_design/studentMessage/1",
+                        data:{
+                            num:num,
+                            name:name,
+                            sex:sex,
+                            dep:dep,
+                            major:major,
+                            banji:banji,
+                            phone:phone
+                        },headers:{
+                            "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
+                        }
+                    }).then(res=>{
+                        if(res.data.toString() === "true"){
+                            alert("修改成功");
+                            this.cancel();
+                        }else {
+                            alert("修改数据与之前一直");
+                        }
+                    })
+                }
+            },
+            showInOutLog(){
+                alert("只展示进出记录记录");
+                window.location.href="mainPageForLog.html";
+            },
+            showNotice(){
+                alert("只展示通知");
+                window.location.href="mainPageForNotes.html";
+            },
+            showRequestPage(){
+                alert("展示自己的请求，下面是修改按钮，点击修改信息");
+                window.location.href="mainPageForRequest.html";
+            },
+            showPersonalMessage(){
+                alert("展示个人信息，下面是修改按钮，点击修改信息")
+            },
+            getAll(){
+                this.getAccountName();
+                var num =this.p.num;
+                // 通过学号查信息填入网页
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/graduation_design/inOutLog/5/num/"+num,
+                }).then(res=>{
+                    this.form=res.data;
+                })
+            },
+            getAccountName(){
+                this.p.num=localStorage.getItem("key");
+            },
+            //修改信息即将disabled属性打开
+            startUpdate(){
+                this.disabled = false;
+            },
+            cancel(){
+                this.getAll();
+                this.disabled = true;
+            },
+            returnLoginPage(){
+                var v = confirm("确认退出登录？");
+                if(v){
+                    window.location.href="loginPage.html"//跳转回去
+                }
+
+                //弹出确认框
+                function popup(){
+                    alert("确认退出登录？");
+                }
+            },
+            handleOpen(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            handleClose(key, keyPath) {
+                console.log(key, keyPath);
+            }
+        }
+    })
+    //显示实时时间方法
+    setInterval(() => {
+        function showdata() {
+            var date=new Date();
+
+            //年
+            var year = date.getFullYear();
+            //月
+            var month =
+                date.getMonth() + 1 < 10
+                    ? "0" + (date.getMonth() + 1)
+                    : date.getMonth() + 1;
+            //日
+            var day =
+                date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+            //时
+            var hh =
+                date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+            //分
+            var mm =
+                date.getMinutes() < 10
+                    ? "0" + date.getMinutes()
+                    : date.getMinutes();
+            //秒
+            var ss =
+                date.getSeconds() < 10
+                    ? "0" + date.getSeconds()
+                    : date.getSeconds();
+
+            var nowTime;
+
+            nowTime =
+                year +
+                "年" +
+                month +
+                "月" +
+                day +
+                "日" +
+                " " +
+                hh +
+                ":" +
+                mm +
+                ":" +
+                ss;
+            return nowTime;
+        }
+        var d=showdata()
+        time.innerHTML=d
+    }, 1000);
+</script>
+</body>
+</html>

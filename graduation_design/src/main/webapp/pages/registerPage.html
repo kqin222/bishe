@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #design_name {
+            text-align: center;
+            margin-top: 10%;
+        }
+
+        .box {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 430px;
+            height: 100%;
+            margin: -300px 0 0 -215px;
+            border-radius: 20px;
+        }
+
+        .form-item {
+            position: relative;
+            width: 360px;
+            margin: 0 auto;
+            padding-bottom: 30px;
+        }
+
+        .box .form-item input {
+            width: 100%;
+            height: 48px;
+            padding-left: 20px;
+            border: 1px solid black;
+            border-radius: 25px;
+            font-size: 18px;
+        }
+
+        .box .form-item button {
+            position: relative;
+            margin-left: 10px;
+            width: 360px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 18px;
+            border: 3px solid black;
+        }
+
+        .reg-bar a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .reg-bar a:hover {
+            text-decoration: underline;
+        }
+        body {
+            overflow: hidden;
+            position: fixed;
+            width:100%;
+            height:100%;
+            background: url(../pic/img1.jpg) no-repeat;
+            background-size:cover;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1 id="design_name">注册账号</h1>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="form-item">
+        <input id="username" type="text" placeholder="账号" style="background-color: rgba(0,0,0,0)"/>
+        <span style="font-size: 10px; color: aqua;position: relative;margin-left: 10px" id="tips1"></span>
+    </div>
+
+    <div class="form-item">
+        <input id="password" type="password" placeholder="密码" style="background-color: rgba(0,0,0,0)"/>
+        <span  style="font-size: 10px; color: aqua;position: relative;margin-left: 10px" id="tips2"></span>
+    </div>
+
+    <div class="form-item">
+        <input id="rePassword" type="password" placeholder="确认密码" style="background-color: rgba(0,0,0,0)"/>
+        <span  style="font-size: 10px; color: aqua;position: relative;margin-left: 10px" id="tips3"></span>
+    </div>
+    <br>
+    <div class="form-item">
+        <button id="register" style="background-color: rgba(0,0,0,0)">注册</button>
+    </div>
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var accountName = document.getElementById("username").value;
+    var accountPassword = document.getElementById("password").value;
+    var accountRePassword = document.getElementById("rePassword").value;
+
+    var ans;//查总表看学号存不存在
+    var ans1;//查账户表看账户存不存在，存在代表被注册
+    document.getElementById("username").onblur=checkAccountNumExist;
+    document.getElementById("password").onblur=checkPassword;
+    document.getElementById("rePassword").onblur=checkRePassword;
+
+
+    //注册按钮点击注册事件
+    document.getElementById("register").onclick=function (){
+        console.log(ans1+"方法结束后");
+        if(!ans){
+            //在总信息里查学号有没有，有则可以注册（只有有学号信息的才可以注册）
+            alert("学号不存在，无法注册");
+        }else if(ans1) {
+            //在账户信息里查账户名存不存在，存在报错
+            alert("学号已经被注册");
+        } else if (!checkPassword()){
+            //密码不符合规范
+            alert("密码不符合规范");
+        }else if (accountPassword.toString() !== accountRePassword.toString()){
+            //前后密码不一致
+            alert("前后密码不一致");
+        }else {
+            axios({
+                method:"post",
+                url:"http://localhost:8080/graduation_design/studentAccount/1/accountName/"+accountName+"/accountPassword/"+accountPassword+""
+            }).then(res=>{
+                if(res.data.toString() === "true"){
+                    alert("注册成功");
+                    ans1 =  true;
+                }else{
+                    alert("注册失败");
+                }
+            })
+        }
+    }
+    //检查学号是否存在，学号存在则可以注册
+    function checkAccountNumExist(){
+        checkAccountNameExist();
+        var accountNum = document.getElementById("username").value;
+        var tips1 = document.getElementById("tips1");
+        axios({
+            method:"get",
+            url:"http://localhost:8080/graduation_design/studentMessage/1/"+accountNum
+        }).then(res=>{
+            if(res.data.toString() === "true"){
+                tips1.innerText="";
+                ans = true;
+            }else{
+                tips1.innerText="学号不正确,无法注册";
+                ans = false;
+            }
+        })
+        return ans;
+    }
+    //查询账户名是否存在
+    function checkAccountNameExist(){
+        accountName = document.getElementById("username").value;
+        axios({
+            method:"get",
+            url:"http://localhost:8080/graduation_design/studentAccount/1/"+accountName
+        }).then(res=>{
+            if(res.data.toString() === "true"){
+                ans1 = true;
+                console.log(ans1);
+            }else{
+                ans1 = false;
+                console.log(ans1);
+            }
+        })
+        return ans1;
+    }
+    function checkPassword(){
+        checkRePassword();
+        var tips2 = document.getElementById("tips2");
+        var accountPassword = document.getElementById("password").value;
+        var pwdRegex = new RegExp('(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{8,30}');
+
+        if (accountPassword.length < 6||accountPassword > 12||pwdRegex.test(accountPassword)) {
+            tips2.innerText = "密码不符合规范（密码中必须包含大小写字母、数字、特殊字符，长度为6-12个字符）";
+            return false;
+        }else {
+            tips2.innerText = "";
+            return true;
+        }
+    }
+    function checkRePassword(){
+            accountName = document.getElementById("username").value;
+            accountPassword = document.getElementById("password").value;
+            accountRePassword = document.getElementById("rePassword").value;
+            var tip3 = document.getElementById("tips3");
+            if (accountPassword.toString() !== accountRePassword.toString()){
+                tip3.innerText = "前后密码不一致";
+            }else {
+                tip3.innerText = "";
+            }
+    }
+</script>
+
+</body>
+</html>
